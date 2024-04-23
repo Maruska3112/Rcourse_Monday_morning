@@ -1,0 +1,131 @@
+---
+---
+title: "Final Assessment"
+author: "Marie-Anna Sedlinska"
+date: "`r date()`"
+format:
+  html:
+    toc: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    embed-resources: true
+  pdf:
+    toc: true
+  docx:
+    toc: true
+---    
+    
+```{r}
+#| output: false
+# Load libraries
+library(here)
+library(tidyverse)
+library(lubridate)
+library(unibeCols)
+library(medicaldata)
+library(dplyr)
+
+```
+
+## Introduction
+
+This report will visualize the proportion of positive and negative COVID-19 tests in relationship to the amount of days after the start of the pandemic. The covid_testing dataset from the medicaldata package in R will be used. 
+
+
+## Data 
+
+The data from the medicaldata package in R were used. Information about the dataset can be accessed here: <https://cran.r-project.org/web/packages/medicaldata/medicaldata.pdf>
+
+
+```{r}
+#| output: false
+
+# Read data and assigning them to an object
+# Data comes from the medicaldata package in R
+
+data_covid <- covid_testing
+```
+
+```{r}
+# Process data
+
+sorted_covid <- data_covid %>%
+  arrange(pan_day)
+
+
+```
+
+Figure x shows the number of positive COVID-19 cases according to the day after the start of the pandemic. 
+
+```{r}
+
+#| label: fig_covid_cases
+#| fig-cap: "Positive COVID-19 results in time"
+#| fig-width: 8
+#| fig-height: 4
+
+# Calculate the proportions of positive and negative tests by gender
+proportions <- sorted_covid %>%
+  group_by(gender, result) %>%
+  summarise(count = n()) %>%
+  mutate(proportion = count / sum(count))
+
+# Create a bar plot showing the proportions
+ggplot(proportions, aes(x = gender, y = proportion, fill = result)) +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = c("negative" = "blue", "positive" = "red")) +  # Set colors for negative and positive results
+  labs(x = "Gender", y = "Proportion", title = "Proportions of Positive and Negative Tests by Gender") +
+  theme_minimal()
+
+
+
+
+```
+
+## Conclusion
+
+In the figure, we can see the proportion of the positive and negative covid tests by gender. 
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
