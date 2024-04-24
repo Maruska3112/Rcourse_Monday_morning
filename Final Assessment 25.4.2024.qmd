@@ -1,0 +1,132 @@
+---
+title: "Final Assessment"
+author: "Marie-Anna Sedlinska"
+date: "`r date()`"
+format:
+  html:
+    toc: true
+    code-fold: show
+    code-tools: true
+    df-print: paged
+    embed-resources: true
+  pdf:
+    toc: true
+  docx:
+    toc: true
+---    
+    
+```{r}
+#| output: false
+# Load libraries
+library(here)
+library(tidyverse)
+library(lubridate)
+library(unibeCols)
+library(medicaldata)
+library(dplyr)
+library(usethis)
+
+```
+
+## Introduction
+
+This aim of this report is to visualize the proportion of positive and negative COVID-19 tests by gender and calculate whether there was a significant difference between the proportion of positive and negative COVID-19 between the genders. The covid_testing dataset from the medicaldata package in R will be used for this analysis. 
+
+
+## Data 
+
+The data from the medicaldata package in R were used. Information about the dataset can be accessed here: <https://cran.r-project.org/web/packages/medicaldata/medicaldata.pdf>
+
+
+```{r}
+#| output: false
+
+# Read data and assigning them to an object
+# Data comes from the medicaldata package in R
+
+data_covid <- covid_testing
+```
+
+```{r}
+# Process data
+sorted_covid <- data_covid %>%
+  arrange(pan_day)
+
+# Summary table with counts of positive and negative cases for each gender
+summary_table <- sorted_covid %>%
+  group_by(gender, result) %>%
+  summarise(count = n())
+
+# Calculating proportions
+summary_table <- summary_table %>%
+  group_by(gender) %>%
+  mutate(proportion = count / sum(count))
+
+
+```
+
+
+```{r}
+# Data Analysis
+# Differences in the number of positive and negative COVID-19 test results between genders.
+# Applying chi-squared test
+
+cont_table <- table(sorted_covid$gender, sorted_covid$result)
+
+# Perform chi-square test of independence
+chi_sq_test <- chisq.test(cont_table)
+```
+
+### Numbers of positive, negative and invalid Covid-19 test results per Gender
+
+```{r}
+# Print contingency table
+print(cont_table)
+```
+
+### Chi-squared test results
+
+```{r}
+# Print chi-square test result
+print(chi_sq_test)
+```
+
+## Analysis Conclusion
+
+The results of the chi-squared test showed that there is no significant difference in the COVID-19 test results between the genders. 
+
+@fig_covid_cases shows the proportion of positive and negative COVID-19 tests per gender.  
+
+### Figure 1: Proportions of Positive and Negative Covid-19 Tests by Gender
+
+
+```{r fig_covid_cases, echo = FALSE}
+
+# Figure: Covid-19 Test results by gender. 
+
+#| label: fig_covid_cases
+#| fig-cap: "Proportions of Positive and Negative Covid-19 Tests by Gender."
+#| fig-width: 8
+#| fig-height: 4
+
+# Create bar plot showing the proportions
+fig_covid_cases <- ggplot(summary_table, aes(x = gender, y = proportion, fill = result)) +
+  geom_bar(stat = "identity", position = "stack") +
+  geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 3) + # Add text labels for exact counts
+  scale_fill_manual(values = c("negative" = "blue", "positive" = "red")) +  # Set colors for negative and positive results
+  labs(x = "Gender", y = "Proportion", title = "Proportions of Positive and Negative Covid-19 Tests by Gender") +
+  theme_minimal()
+
+print(fig_covid_cases)
+
+```
+
+## Conclusion
+
+The aim of this report was to visualise the proportion of positive and negative COVID-19 tests by gender. By visual inspection, we can see that the proportion of positive and negative tests does not seem to differ meaningfully between genders. Applying the chi-squared test, there was no significant difference between the numbers of positive and negavtive COVID-19 tests by gender. 
+
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
